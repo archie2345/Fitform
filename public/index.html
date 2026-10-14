@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FitForm: find your size in every shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--white:#fff;--nude:#f7f1ea;--sand:#e4d3c1;--brown:#6b4a35;--ink:#3b2a20}
+*{box-sizing:border-box}
+body{margin:0;background:var(--nude);color:var(--ink);font:17px/1.55 Jost,system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:56px 22px 72px}
+h1{font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.08;font-weight:300;margin:0 0 12px;letter-spacing:-.01em}
+.sub{margin:0 0 36px;color:var(--brown);max-width:44ch}
+form{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
+.row{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp{flex:1}
+.pill{border:1px solid var(--brown);border-radius:99px;padding:5px 18px;cursor:pointer;position:relative;color:var(--brown)}
+.pill input{position:absolute;opacity:0}
+.pill:has(input:checked){background:var(--brown);color:var(--white)}
+.pill:has(input:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
+.f{display:grid;gap:4px;font-weight:500}
+.f small{font-weight:400;color:var(--brown)}
+input[type=number]{font:inherit;padding:11px 12px;border:1px solid var(--sand);border-radius:4px;background:var(--white);color:var(--ink)}
+input[type=number]:focus{outline:2px solid var(--brown);border-color:var(--brown)}
+input::placeholder{color:#b9a898}
+.go{grid-column:1/-1;font:inherit;font-weight:500;padding:14px;border:0;border-radius:4px;background:var(--brown);color:var(--white);cursor:pointer}
+.ghost{background:none;border:0;font:inherit;color:var(--brown);text-decoration:underline;cursor:pointer;padding:0}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#out{margin-top:40px;overflow-x:auto}
+h2{font-size:1.1rem;font-weight:500;margin:0 0 10px;color:var(--brown)}
+table{width:100%;border-collapse:collapse;background:var(--white);margin-bottom:20px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--sand);vertical-align:top}
+th{font-weight:500;color:var(--brown)}
+td b{font-size:1.3rem;font-weight:500}
+small{display:block;color:var(--brown);font-size:.85rem}
+.err{color:#8a3b2b;font-weight:500}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--sand);font-size:.9rem;color:var(--brown)}
+footer ul{padding-left:18px;margin:8px 0}
+footer a{color:var(--ink)}
+@media(max-width:480px){form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Know your size in every shop.</h1>
+<p class="sub">Enter your measurements once. Get your size in every region worldwide, and at brands we have charts for.</p>
+<form id="f">
+  <div class="row" role="radiogroup" aria-label="Sizing">
+    <label class="pill"><input type="radio" name="gender" value="women" checked>Women</label>
+    <label class="pill"><input type="radio" name="gender" value="men">Men</label>
+    <span class="sp"></span>
+    <label class="pill"><input type="radio" name="unit" value="cm" checked>cm</label>
+    <label class="pill"><input type="radio" name="unit" value="in">in</label>
+  </div>
+  <label class="f"><span id="chestL">Bust</span><input type="number" name="chest" step="0.1" min="0" required><small id="h-chest"></small></label>
+  <label class="f">Waist<input type="number" name="waist" step="0.1" min="0" required><small id="h-waist"></small></label>
+  <label class="f">Hips<input type="number" name="hip" step="0.1" min="0" required><small id="h-hip"></small></label>
+  <label class="f">Height<input type="number" name="height" step="0.1" min="0" required><small id="h-height"></small></label>
+  <div class="row"><button type="button" class="ghost" id="ex">Fill in an example</button></div>
+  <button class="go">Find my size</button>
+</form>
+<div id="out" aria-live="polite"></div>
+<footer>
+  <b>Where the numbers come from</b>
+  <ul id="src"></ul>
+  Charts vary by country and by style. Always check the size guide on the product page before you buy. <a href="privacy.html">Privacy</a>
+</footer>
+</main>
+<script src="sizing.js"></script>
+<script>
+const $ = s => document.querySelector(s), f = $('#f'), IN = 2.54;
+const EX = { women: { chest: 90, waist: 72, hip: 97, height: 165 }, men: { chest: 100, waist: 85, hip: 100, height: 178 } };
+const HINT = { chest: 'Fullest part.', waist: 'Narrowest part.', hip: 'Widest part.', height: 'Standing, no shoes.' };
+const show = cm => f.unit.value === 'in' ? Math.round(cm / IN * 2) / 2 : cm;
+
+function refresh() {
+  $('#chestL').textContent = f.gender.value === 'women' ? 'Bust' : 'Chest';
+  const e = EX[f.gender.value];
+  for (const k in e) { f[k].placeholder = show(e[k]); $('#h-' + k).textContent = `${HINT[k]} Example: ${show(e[k])} ${f.unit.value}`; }
+}
+f.addEventListener('change', refresh);
+$('#ex').onclick = () => { const e = EX[f.gender.value]; for (const k in e) f[k].value = show(e[k]); };
+refresh();
+
+$('#src').innerHTML = SOURCES.map(s => `<li><a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>: ${s.note}</li>`).join('');
+
+const cell = x => `<td><b>${x.size || 'None'}</b>${x.label ? `<small>${x.label}</small>` : ''}${x.note ? `<small>${x.note}</small>` : ''}</td>`;
+f.addEventListener('submit', e => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(f)), k = d.unit === 'in' ? IN : 1, m = {};
+  for (const n of ['chest', 'waist', 'hip', 'height']) m[n] = (d[n] * k).toFixed(1);
+  const r = findSizes(d.gender, m), out = $('#out');
+  if (r.error) { out.innerHTML = '<p class="err"></p>'; out.firstChild.textContent = r.error; return; }
+  const rg = r.world.regions, row = (n, w) => `<tr><td>${n}</td><td><b>${w.letter || 'None'}</b>${w.note ? `<small>${w.note}</small>` : ''}</td>${rg.map(x => `<td>${w.values[x] ?? ''}</td>`).join('')}</tr>`;
+  out.innerHTML = `<h2>Your size worldwide</h2>
+    <table><tr><th></th><th>Size</th>${rg.map(x => `<th>${x}</th>`).join('')}</tr>${row('Top', r.world.top)}${row('Bottom', r.world.bottom)}</table>
+    <h2>At brands we have charts for</h2>
+    <table><tr><th>Brand</th><th>Top</th><th>Bottom</th></tr>
+    ${r.brands.map(b => `<tr><td>${b.brand}</td>${cell(b.top)}${cell(b.bottom)}</tr>`).join('')}</table>
+    ${r.length ? `<p><b>${r.length}</b></p>` : ''}
+    <small>Brand not listed? Use your worldwide size, then check that brand's own size guide. Estimates only. Fit varies by style.</small>`;
+});
+</script>
+</body>
+</html>

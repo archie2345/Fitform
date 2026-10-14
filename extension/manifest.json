@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "FitForm",
+  "version": "0.3.0",
+  "description": "Know your size on any shopping site. Your measurements never leave your browser.",
+  "minimum_chrome_version": "111",
+  "permissions": ["storage"],
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "action": { "default_popup": "popup.html", "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png" } },
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["sizing.js", "badge.js", "content.js"],
+      "run_at": "document_idle",
+      "all_frames": false,
+      "match_about_blank": false
+    }
+  ]
+}
