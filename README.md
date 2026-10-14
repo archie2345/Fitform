@@ -26,7 +26,7 @@ Enter your measurements once, then see your size on any product page.
 Open http://localhost:8000.
 
 ## Deploy to Vercel
-VERCEL LINK ADD!
+https://fitform-public.vercel.app/
 
 ## Install the extension
 1. Open chrome://extensions and turn on Developer mode.
